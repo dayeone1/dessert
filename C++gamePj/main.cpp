@@ -1,44 +1,48 @@
-#include <SFML/Graphics.hpp>
-#include "System.h" // System.h Çì´õ ÆÄÀÏ Æ÷ÇÔ
+ï»¿#include <SFML/Graphics.hpp>
+#include <thread>
+#include "System.h" // System.h í—¤ë” íŒŒì¼ í¬í•¨
 
 const int WINDOW_WIDTH = 1400;
 const int WINDOW_HEIGHT = 600;
 
 int main() {
-    // Ã¢ »ı¼º
-    sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "SFML °ÔÀÓ");
+    // ì°½ ìƒì„±
+    sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), L"SFML ê²Œì„");
 
-    // µµÇü »ı¼º (¿¹: ¿ø)
-    sf::CircleShape circle(50); // ¹İÁö¸§ 50ÀÇ ¿ø
-    circle.setFillColor(sf::Color::Green); // »ö»ó ¼³Á¤
-    circle.setPosition(WINDOW_WIDTH / 2 - 50, WINDOW_HEIGHT / 2 - 50); // Áß¾Ó¿¡ À§Ä¡
+    // ë„í˜• ìƒì„± (ì˜ˆ: ì›)
+    sf::CircleShape circle(50); // ë°˜ì§€ë¦„ 50ì˜ ì›
+    circle.setFillColor(sf::Color::Green); // ìƒ‰ìƒ ì„¤ì •
+    circle.setPosition(WINDOW_WIDTH / 2 - 50, WINDOW_HEIGHT / 2 - 50); // ì¤‘ì•™ì— ìœ„ì¹˜
 
-    // System Å¬·¡½º ÀÎ½ºÅÏ½º »ı¼º
+    // System í´ë˜ìŠ¤ ì¸ìŠ¤í„´ìŠ¤ ìƒì„±
     System system;
 
-    // Å¸ÀÌ¸Ó¸¦ º°µµÀÇ ½º·¹µå¿¡¼­ ½ÇÇà
+    // íƒ€ì´ë¨¸ë¥¼ ë³„ë„ì˜ ìŠ¤ë ˆë“œì—ì„œ ì‹¤í–‰
     std::thread timerThread(&System::startTimer, &system);
 
-    // Ã¢ÀÌ ¿­·Á ÀÖ´Â µ¿¾È ·çÇÁ ½ÇÇà
+    // ì°½ì´ ì—´ë ¤ ìˆëŠ” ë™ì•ˆ ë£¨í”„ ì‹¤í–‰
     while (window.isOpen()) {
-        // ÀÌº¥Æ® Ã³¸®
+        // ì´ë²¤íŠ¸ ì²˜ë¦¬
         sf::Event event;
         while (window.pollEvent(event)) {
             if (event.type == sf::Event::Closed)
-                window.close(); // Ã¢ ´İ±â ÀÌº¥Æ® Ã³¸®
+                window.close(); // ì°½ ë‹«ê¸° ì´ë²¤íŠ¸ ì²˜ë¦¬
         }
 
-        // È­¸é Áö¿ì±â
+        // í™”ë©´ ì§€ìš°ê¸°
         window.clear(sf::Color::Black);
 
-        // µµÇü ±×¸®±â
+        // ë„í˜• ê·¸ë¦¬ê¸°
         window.draw(circle);
 
-        // È­¸é¿¡ ±×¸®±â
+        // í…ìŠ¤íŠ¸ ê·¸ë¦¬ê¸°
+        window.draw(system.getElapsedText());
+
+        // í™”ë©´ì— ê·¸ë¦¬ê¸°
         window.display();
     }
 
-    // Å¸ÀÌ¸Ó ½º·¹µå Á¾·á ´ë±â
+    // íƒ€ì´ë¨¸ ìŠ¤ë ˆë“œ ì¢…ë£Œ ëŒ€ê¸°
     timerThread.join();
 
     return 0;

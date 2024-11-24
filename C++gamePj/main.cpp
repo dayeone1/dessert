@@ -1,49 +1,154 @@
 ﻿#include <SFML/Graphics.hpp>
-#include <thread>
-#include "System.h" // System.h 헤더 파일 포함
+#include <iostream>
+#include <functional>
+#include <vector>
 
-const int WINDOW_WIDTH = 1400;
-const int WINDOW_HEIGHT = 600;
+using namespace std;
 
+// 창넘김 if문에 들어갈 상수
+enum screen_number {
+    Start,
+    Main,
+    BadEnding,
+    HappyEnding
+};
+
+int screen_num = screen_number::Start;
+
+class Button {
+public:
+    // 이미지 2개, x, y, x1, y1, 클릭 시 이벤트
+    Button(const string& normalImagePath, const string& hoverImagePath,
+        float x, float y, float x1, float y1, function<void()> onClick)
+        : onClick(onClick) {
+        // 이미지 로드
+        if (!buttonImg.loadFromFile(normalImagePath) ||
+            !buttonClickImg.loadFromFile(hoverImagePath)) {
+            cerr << "Error loading images" << endl;
+        }
+
+        // 일반 이미지 스프라이트 설정
+        setPosition(x, y);
+        sprite.setTexture(buttonImg);
+
+        // 클릭 이미지 스프라이트 설정
+        setHoverPosition(x1, y1);
+        hoverSprite.setTexture(buttonClickImg);
+    }
+
+    void setPosition(float x, float y) {
+        sprite.setPosition(x, y);
+    }
+
+    void setHoverPosition(float x1, float y1) {
+        hoverSprite.setPosition(x1, y1);
+    }
+
+    void draw(sf::RenderWindow& window) {
+        // 현재 상태에 따라 적절한 스프라이트를 그리기
+        if (isHovered) {
+            window.draw(hoverSprite);
+        }
+        else {
+            window.draw(sprite);
+        }
+    }
+
+    void checkHover(sf::Vector2f mousePos) {
+        isHovered = sprite.getGlobalBounds().contains(mousePos);
+    }
+
+    void checkClick(sf::Vector2f mousePos) {
+        if (sprite.getGlobalBounds().contains(mousePos)) {
+            onClick();
+        }
+    }
+
+private:
+    sf::Texture buttonImg;        // 버튼 일반 이미지
+    sf::Texture buttonClickImg;   // 버튼 클릭 이미지
+    sf::Sprite sprite;            // 일반 이미지 스프라이트
+    sf::Sprite hoverSprite;       // 클릭 이미지 스프라이트
+    function<void()> onClick;
+    bool isHovered = false;        // 현재 호버 상태
+};
+
+class StartScreen {
+public:
+    StartScreen() {
+        // 텍스처 및 스프라이트 생성
+        if (!backgroundTexture.loadFromFile("img/background/start_back.png")) {
+            cerr << "Error loading background image" << endl;
+        }
+        backgroundSprite.setTexture(backgroundTexture);
+
+        // 버튼 생성
+        buttons.emplace_back("img/start/startButton_default.png", "img/start/startButton_rule.png",
+            705, 270, 590, 210, []() {
+                cout << "Rule button clicked!" << endl;
+                // 여기서 화면 전환 로직 추가 가능
+            });
+        buttons.emplace_back("img/start/startButton_default.png", "img/start/startButton_start.png",
+            855, 270, 745, 210, []() {
+                cout << "Start button clicked!" << endl;
+                // 규칙 버튼 클릭 시 로직 추가 가능
+            });
+    }
+
+    void draw(sf::RenderWindow& window) {
+        window.draw(backgroundSprite);
+        for (auto& button : buttons) {
+            button.draw(window);
+        }
+    }
+
+    void checkButtonClick(sf::Vector2f mousePos) {
+        for (auto& button : buttons) {
+            button.checkClick(mousePos);
+        }
+    }
+
+    void checkButtonHover(sf::Vector2f mousePos) {
+        for (auto& button : buttons) {
+            button.checkHover(mousePos);
+        }
+    }
+
+private:
+    sf::Texture backgroundTexture;
+    sf::Sprite backgroundSprite;
+    vector<Button> buttons; // 버튼 벡터
+};
+
+// 메인
 int main() {
-    // 창 생성
-    sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), L"SFML 게임");
+    sf::RenderWindow window(sf::VideoMode(1200, 650), "test");
 
-    // 도형 생성 (예: 원)
-    sf::CircleShape circle(50); // 반지름 50의 원
-    circle.setFillColor(sf::Color::Green); // 색상 설정
-    circle.setPosition(WINDOW_WIDTH / 2 - 50, WINDOW_HEIGHT / 2 - 50); // 중앙에 위치
+    StartScreen start_screen; // 버튼이 포함된 StartScreen 객체 생성
 
-    // System 클래스 인스턴스 생성
-    System system;
-
-    // 타이머를 별도의 스레드에서 실행
-    std::thread timerThread(&System::startTimer, &system);
-
-    // 창이 열려 있는 동안 루프 실행
     while (window.isOpen()) {
-        // 이벤트 처리
         sf::Event event;
         while (window.pollEvent(event)) {
             if (event.type == sf::Event::Closed)
-                window.close(); // 창 닫기 이벤트 처리
+                window.close();
+            if (event.type == sf::Event::MouseButtonPressed) {
+                if (screen_num == screen_number::Start) {
+                    start_screen.checkButtonClick(sf::Vector2f(event.mouseButton.x, event.mouseButton.y));
+                }
+            }
         }
 
-        // 화면 지우기
-        window.clear(sf::Color::Black);
+        // 마우스 위치 체크
+        sf::Vector2f mousePos = (sf::Vector2f)sf::Mouse::getPosition(window);
+        if (screen_num == screen_number::Start) {
+            start_screen.checkButtonHover(mousePos); // 버튼 호버 체크
+        }
 
-        // 도형 그리기
-        window.draw(circle);
-
-        // 텍스트 그리기
-        window.draw(system.getElapsedText());
-
-        // 화면에 그리기
+        window.clear();
+        if (screen_num == screen_number::Start) {
+            start_screen.draw(window);
+        }
         window.display();
     }
-
-    // 타이머 스레드 종료 대기
-    timerThread.join();
-
     return 0;
 }

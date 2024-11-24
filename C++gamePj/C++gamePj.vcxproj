@@ -130,14 +130,12 @@
     <ClCompile Include="main.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="System.h" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="image\mask_image.png" />
-    <Image Include="image\my_image.png" />
+    <Image Include="ima\background\start_back.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="gulim.ttc" />
+    <None Include="font\gulim.ttc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

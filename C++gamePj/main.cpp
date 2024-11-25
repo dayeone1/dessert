@@ -17,47 +17,36 @@ int screen_num = screen_number::Start;
 
 class Button {
 public:
-    // 이미지 2개, x, y, x1, y1, 클릭 시 이벤트
+    // 기본 이미지, hover 이미지, 각각의 좌표값, 함수
     Button(const string& normalImagePath, const string& hoverImagePath,
-        float x, float y, float x1, float y1, function<void()> onClick)
+           float x, float y, float x1, float y1, function<void()> onClick)
         : onClick(onClick) {
-        // 이미지 로드
         if (!buttonImg.loadFromFile(normalImagePath) ||
             !buttonClickImg.loadFromFile(hoverImagePath)) {
             cerr << "Error loading images" << endl;
         }
 
-        // 일반 이미지 스프라이트 설정
-        setPosition(x, y);
         sprite.setTexture(buttonImg);
-
-        // 클릭 이미지 스프라이트 설정
-        setHoverPosition(x1, y1);
-        hoverSprite.setTexture(buttonClickImg);
-    }
-
-    void setPosition(float x, float y) {
         sprite.setPosition(x, y);
-    }
 
-    void setHoverPosition(float x1, float y1) {
-        hoverSprite.setPosition(x1, y1);
+        hoverSprite.setTexture(buttonClickImg);
+        hoverSprite.setPosition(x1, y1); // 호버 이미지 위치 설정
     }
 
     void draw(sf::RenderWindow& window) {
-        // 현재 상태에 따라 적절한 스프라이트를 그리기
         if (isHovered) {
             window.draw(hoverSprite);
-        }
-        else {
+        } else {
             window.draw(sprite);
         }
     }
 
+    // 이미지 위에 마우스가 있는지 확인
     void checkHover(sf::Vector2f mousePos) {
         isHovered = sprite.getGlobalBounds().contains(mousePos);
     }
 
+    // 클릭 확인
     void checkClick(sf::Vector2f mousePos) {
         if (sprite.getGlobalBounds().contains(mousePos)) {
             onClick();
@@ -73,51 +62,60 @@ private:
     bool isHovered = false;        // 현재 호버 상태
 };
 
+
+class PlayScreen {
+public:
+    PlayScreen() {
+
+    }
+private:
+    sf::Texture backgroundTexture;
+    sf::Sprite backgroundSprite;
+};
+
 class StartScreen {
 public:
-    StartScreen() {
-        // 텍스처 및 스프라이트 생성
+    StartScreen()
+        :
+        button_start("img/start/startButton_default.png", "img/start/startButton_start.png",
+            855, 270, 740, 210, []() { // 호버 이미지 위치 변경
+                cout << "Start button clicked!" << endl;
+                screen_num = screen_number::Main; // 상태 변경
+            }),
+          button_rule("img/start/startButton_default1.png", "img/start/startButton_rule.png",
+                      705, 270, 590, 210, []() { // 호버 이미지 위치 변경
+                           cout << "Rule button clicked!" << endl;
+                           // 룰 설명 이미지
+                       })
+    {
         if (!backgroundTexture.loadFromFile("img/background/start_back.png")) {
             cerr << "Error loading background image" << endl;
         }
         backgroundSprite.setTexture(backgroundTexture);
-
-        // 버튼 생성
-        buttons.emplace_back("img/start/startButton_default.png", "img/start/startButton_rule.png",
-            705, 270, 590, 210, []() {
-                cout << "Rule button clicked!" << endl;
-                // 여기서 화면 전환 로직 추가 가능
-            });
-        buttons.emplace_back("img/start/startButton_default.png", "img/start/startButton_start.png",
-            855, 270, 745, 210, []() {
-                cout << "Start button clicked!" << endl;
-                // 규칙 버튼 클릭 시 로직 추가 가능
-            });
     }
 
     void draw(sf::RenderWindow& window) {
         window.draw(backgroundSprite);
-        for (auto& button : buttons) {
-            button.draw(window);
-        }
+        button_rule.draw(window);
+        button_start.draw(window);
     }
 
     void checkButtonClick(sf::Vector2f mousePos) {
-        for (auto& button : buttons) {
-            button.checkClick(mousePos);
-        }
+        button_start.checkClick(mousePos);
+        button_rule.checkClick(mousePos);
     }
 
     void checkButtonHover(sf::Vector2f mousePos) {
-        for (auto& button : buttons) {
-            button.checkHover(mousePos);
-        }
+        button_start.checkHover(mousePos);
+        button_rule.checkHover(mousePos);
     }
 
 private:
+    // 배경 텍스처 & 스크립트
     sf::Texture backgroundTexture;
     sf::Sprite backgroundSprite;
-    vector<Button> buttons; // 버튼 벡터
+    Button button_start; 
+    Button button_rule;
 };
 
 // 메인
@@ -138,7 +136,6 @@ int main() {
             }
         }
 
-        // 마우스 위치 체크
         sf::Vector2f mousePos = (sf::Vector2f)sf::Mouse::getPosition(window);
         if (screen_num == screen_number::Start) {
             start_screen.checkButtonHover(mousePos); // 버튼 호버 체크

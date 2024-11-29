@@ -7,6 +7,7 @@ using namespace std;
 
 // 화면 상태를 나타내는 열거형
 enum screen_number {
+    Loding,
     Start,
     Main,
     Happy_Ending,
@@ -14,7 +15,7 @@ enum screen_number {
     Rule,
 };
 
-int screen_num = screen_number::Start;
+int screen_num = screen_number::Loding;
 int score = -1;
 
 class Button {
@@ -113,7 +114,7 @@ public:
             }
             sf::Text scoreText;
             scoreText.setFont(font);
-            scoreText.setString(to_string(score)+" 원");
+            scoreText.setString(to_string(score));
             scoreText.setCharacterSize(30); // 글자 크기 설정
             scoreText.setFillColor(sf::Color::Black); // 글자 색상 설정
             scoreText.setPosition(933, 227); // 점수 위치 설정
@@ -144,10 +145,9 @@ class MainScreen : public Screen {
 public:
     MainScreen() {
         // 버튼 초기화
-        // 0, 1, 2 -> 아이스크림 3, 4, 5 -> 생크림 6, 7 -> 생크림 8 -> 컵 
+        // 0, 1, 2 -> 아이스크림 3, 4, 5 -> 생크림 6, 7 -> 과일 8 -> 컵 
         // 9-> 빵 10, 11, 12-> 토핑 13-> 쓰레기통 14-> 작업대
 
-        //왜 배열안에 넣기만 하면 오류가 나는거ㅛㅈ???////////?//////'/
         button_area[0] = Button("img/main/obj_box/ice_box.png", "", 84, 169, [this]() {
             cout << "Ice Box clicked!" << endl;
             event = 0;
@@ -235,8 +235,6 @@ public:
         button_area[14] = Button("img/main/obj_box/bench_box.png", "", 703, 269, [this]() {
             cout << "Another Box clicked!" << endl;
             isFollowingMouse = false;
-
-
             event = -1;
             });
 
@@ -267,6 +265,7 @@ public:
     }
 
     void draw(sf::RenderWindow& window) override {
+
         window.draw(backgroundSprite);
         window.draw(charSprite[emotion]);
         window.draw(messageSprite);
@@ -276,22 +275,6 @@ public:
         for (int i = 0; i < 15; i++) {
             button_area[i].draw(window);
         }
-
-        /*button_area[0].draw(window);
-        button_area[1].draw(window);
-        button_area[2].draw(window);
-        button_area[3].draw(window);
-        button_area[4].draw(window);
-        button_area[5].draw(window);
-        button_area[6].draw(window);
-        button_area[7].draw(window);
-        button_area[8].draw(window);
-        button_area[9].draw(window);
-        button_area[10].draw(window);
-        button_area[11].draw(window);
-        button_area[12].draw(window);
-        button_area[13].draw(window);
-        button_area[14].draw(window);*/
 
         // 마우스를 따라다니는 이미지가 활성화 됐을 경우 그리기
         if (isFollowingMouse) {
@@ -303,42 +286,13 @@ public:
         for (int i = 0; i < 15; i++) {
             button_area[i].checkClick(mousePos);
         }
-        /*button_area[0].checkClick(mousePos);
-        button_area[1].checkClick(mousePos);
-        button_area[2].checkClick(mousePos);
-        button_area[3].checkClick(mousePos);
-        button_area[4].checkClick(mousePos);
-        button_area[5].checkClick(mousePos);
-        button_area[6].checkClick(mousePos);
-        button_area[7].checkClick(mousePos);
-        button_area[8].checkClick(mousePos);
-        button_area[9].checkClick(mousePos);
-        button_area[10].checkClick(mousePos);
-        button_area[11].checkClick(mousePos);
-        button_area[12].checkClick(mousePos);
-        button_area[13].checkClick(mousePos);
-        button_area[14].checkClick(mousePos);*/
+
     }
 
     void checkButtonHover(sf::Vector2f mousePos) override {
         for (int i = 0; i < 15; i++) {
             button_area[i].checkHover(mousePos);
         }
-        /*button_area[0].checkHover(mousePos);
-        button_area[1].checkHover(mousePos);
-        button_area[2].checkHover(mousePos);
-        button_area[3].checkHover(mousePos);
-        button_area[4].checkHover(mousePos);
-        button_area[5].checkHover(mousePos);
-        button_area[6].checkHover(mousePos);
-        button_area[7].checkHover(mousePos);
-        button_area[8].checkHover(mousePos);
-        button_area[9].checkHover(mousePos);
-        button_area[10].checkHover(mousePos);
-        button_area[11].checkHover(mousePos);
-        button_area[12].checkHover(mousePos);
-        button_area[13].checkHover(mousePos);
-        button_area[14].checkHover(mousePos);*/
     }
 
     void updateFollowSpritePosition(sf::Vector2f mousePos) {
@@ -371,6 +325,32 @@ private:
     sf::Sprite followSprite[13];    // 마우스를 따라다닐 이미지 스프라이트
 
     Button button_area[15];
+
+};
+
+class LoadingScreen{
+public:
+    LoadingScreen() {
+        // 로딩 중 텍스트 설정
+        if (!font.loadFromFile("font/gulim.ttc")) {
+            cerr << "Error loading font" << endl;
+        }
+        loadingText.setFont(font);
+        loadingText.setString("Loading...");
+        loadingText.setCharacterSize(30);
+        loadingText.setFillColor(sf::Color::Black);
+        loadingText.setPosition(500, 300); // 텍스트 위치 설정
+
+    }
+
+    void draw(sf::RenderWindow& window){
+        window.clear(sf::Color::White); // 배경색 설정
+        window.draw(loadingText); // 로딩 텍스트 그리기
+    }
+
+private:
+    sf::Font font;
+    sf::Text loadingText;
 };
 
 class StartScreen : public Screen {
@@ -420,10 +400,13 @@ int main() {
     sf::RenderWindow window(sf::VideoMode(1200, 650), "test");
 
     StartScreen start_screen;
+    LoadingScreen loading_screen;
     MainScreen main_screen;
     EndingScreen happy_screen(screen_number::Happy_Ending);
     EndingScreen bad_screen(screen_number::Bad_Ending);
     EndingScreen rule_screen(screen_number::Rule);
+
+    bool loadingComplete = false;
 
     sf::Clock clock; // 타이머용 시계
     bool timerStarted = false; // 타이머 시작 여부
@@ -480,6 +463,17 @@ int main() {
         window.clear();
 
         switch (screen_num) {
+        case screen_number::Loding:
+            loading_screen.draw(window);
+            if (!timerStarted) {
+                timerStarted = true;
+                clock.restart(); // 타이머 초기화
+            }
+            if (timerStarted && clock.getElapsedTime().asSeconds() >= 3.0f) {
+                timerStarted = false;
+                screen_num = screen_number::Start;
+            }   
+            break;
         case screen_number::Start:
             start_screen.draw(window);
             break;
@@ -490,7 +484,7 @@ int main() {
                 timerStarted = true;
                 clock.restart(); // 타이머 초기화
             }
-              
+
             // 경과 시간 출력
             //cout << "Elapsed Time: " << clock.getElapsedTime().asSeconds() << " seconds" << endl;
 
@@ -510,6 +504,7 @@ int main() {
         case screen_number::Rule:
             rule_screen.draw(window); break;
         }
+        
         window.display();
     }
 

@@ -149,101 +149,102 @@ public:
         // 각 오브제 클릭 영역 설정
         : button_area{
             Button(objString[0], "", 84, 169, [this]() {
-                cout << "Ice Box clicked!" << endl;
                 event = 0;
                 isFollowingMouse = true; // 마우스를 따라다니는 것을 활성화
             }), 
             Button(objString[0], "", 85, 260, [this]() {
-                cout << "Another Box clicked!" << endl;
                 event = 1;
                 isFollowingMouse = true;
             }),
             Button(objString[0], "", 85, 358, [this]() {
-                cout << "Another Box clicked!" << endl;
                 event = 2;
                 isFollowingMouse = true;
             }),
             Button(objString[1], "", 202, 160, [this]() {
-                cout << "Another Box clicked!" << endl;
                 event = 3;
                 isFollowingMouse = true;
             }),
             Button(objString[1], "", 202, 255, [this]() {
-                cout << "Another Box clicked!" << endl;
                 event = 4;
                 isFollowingMouse = true;
             }),
             Button(objString[1], "", 202, 358, [this]() {
-                cout << "Another Box clicked!" << endl;
                 event = 5;
                 isFollowingMouse = true;
             }),
             Button(objString[2], "", 65, 497, [this]() {
-                cout << "Another Box clicked!" << endl;
                 event = 6;
                 isFollowingMouse = true;
             }),
             Button(objString[2], "", 191, 497, [this]() {
-                cout << "Another Box clicked!" << endl;
                 event = 7;
                 isFollowingMouse = true;
             }),
             Button(objString[3], "", 387, 90, [this]() {
-                cout << "Another Box clicked!" << endl;
                 event = 8;
                 isFollowingMouse = true;
             }),
             Button(objString[4], "", 387, 269, [this]() {
-                cout << "Another Box clicked!" << endl;
                 event = 9;
                 isFollowingMouse = true;
             }),
             Button(objString[5], "", 392, 365, [this]() {
-                cout << "Another Box clicked!" << endl;
                 event = 10;
                 isFollowingMouse = true;
             }),
             Button(objString[5], "", 484, 365, [this]() {
-                cout << "Another Box clicked!" << endl;
                 event = 11;
                 isFollowingMouse = true;
             }),
             Button(objString[5], "", 576, 365, [this]() {
-                cout << "Another Box clicked!" << endl;
                 event = 12;
                 isFollowingMouse = true;
             }),
             Button(objString[6], "", 1014, 502, [this]() {
-                cout << "Another Box clicked!" << endl;
-                isFollowingMouse = false;
-                event = -1;
+                if (event == -1)
+                    resetCook();
+                else {
+                     isFollowingMouse = false;
+                    event = -1;
+                }
             }),
 
             // 작업대
             Button(objString[7], "", 703, 269, [this]() {
-                cout << "Another Box clicked!" << endl;
                 isFollowingMouse = false;
 
                 // 1. 조합순서 확인
+                if (event < cook_arr[cook_num][0] || event > cook_arr[cook_num][2]) {
+                    // 1-2. 틀렸을경우 event = -1 하고 배열에는 추가하지 않음 화난표정
+                    emotion = 2;
+                }
+                else {
+                    // 2. event 확인 후 cook에 저장하기
+                    emotion = 0;
+                    cook[cook_num] = event;
+                    cook_num++;
+                }
                
-                // 1-2. 틀렸을경우 event = -1 하고 배열에는 추가하지 않음
-
-                // 2. event 확인 후 이미지 띄우기 
-
                 // 3. 파르페가 완성되었을때 예시와 같은지 확인
-                if (cook_num == 7 && event != -1) {
+                if (cook_num == 9){
                     int chk = 1;
                     for (int i = 0; i < 9; i++)
-                        if (cook[i] != recipe[i])
-                            chk = 0;
-                    // 4. 맞는지 틀린지에 따라 표정 변화 후 파르페 배열 초기화, 0.5초 유지 이후 
+                        if (cook[i] != recipe[i]) {
+                            chk = 0; break;
+                        }
+                    
+                    // 4. 맞는지 틀린지에 따라 표정 변화 후 파르페 배열 초기화, 맞을경우 score += 1000 추가
                     if (chk) {
-
+                        emotion = 1;
+                        score += 1000;
+                        resetCook();
+                        randomRecipe();
                     }
                     else {
-
+                        emotion = 2;
+                        resetCook();
                     }
-       
+                    cook_num = 0;
                 }
 
                 event = -1;
@@ -300,6 +301,12 @@ public:
                 for (int i = 0; i < 9; i++) {
                     cookSprite[recipe[cook_order[i]]].setPosition(recipeXY[0][cook_order[i]], recipeXY[1][cook_order[i]]);
                     window.draw(cookSprite[recipe[cook_order[i]]]);
+
+                    if (cook[cook_order[i]] > -1) {
+                        cookSprite[cook[cook_order[i]]].setPosition(cookXY[0][cook_order[i]], cookXY[1][cook_order[i]]);
+                        window.draw(cookSprite[cook[cook_order[i]]]);
+                    }
+                    
                 }
 
                 // 마우스를 따라다니는 이미지가 활성화 됐을 경우 그리기
@@ -408,10 +415,10 @@ private:
     sf::Sprite cookSprite[13];
 
     // 음식 작업대 이미지 위치 배열
-    int cookXY[2][11] = { {788, 804, 804, 804, 804, 804, 804, 804, 798, 788},{281, 399, 378, 378, 355, 333, 333, 298, 288} };
+    int cookXY[2][11] = { {790, 804, 804, 804, 804, 804, 804, 804, 798, 788},{328, 399, 378, 378, 355, 333, 333, 298, 288} };
 
     // 음식 레시피 이미지 위치 배열
-    int recipeXY[2][11] = { {763, 777, 777, 777, 777, 777, 777, 771, 761} ,{86, 157, 136, 136, 113, 91, 91, 56, 46} };
+    int recipeXY[2][11] = { {761, 777, 777, 777, 777, 777, 777, 771, 761} ,{86, 157, 136, 136, 113, 91, 91, 56, 46} };
 
     // 레시피 배열
     int recipe[9];
@@ -599,8 +606,8 @@ int main() {
             // 경과 시간 출력
             //cout << "Elapsed Time: " << clock.getElapsedTime().asSeconds() << " seconds" << endl;
 
-            // 10초가 지나면 EndingScreen으로 이동
-            if (timerStarted && clock.getElapsedTime().asSeconds() >= 10.0f) {
+            // 60초가 지나면 EndingScreen으로 이동
+            if (timerStarted && clock.getElapsedTime().asSeconds() >= 20.0f) {
                 timerStarted = false;
                 if (score >= 10000)
                     screen_num = screen_number::Happy_Ending;

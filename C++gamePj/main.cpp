@@ -109,7 +109,7 @@ public:
 
     void draw(sf::RenderWindow& window) override {
         window.draw(backgroundSprite);
-        if (score > -1) {
+        if (score != -1) {
             sf::Font font;
             if (!font.loadFromFile("font/gulim.ttc")) { // 적절한 폰트 경로로 수정
                 cerr << "Error loading font" << endl;
@@ -217,6 +217,7 @@ public:
                 if (event < cook_arr[cook_num][0] || event > cook_arr[cook_num][2]) {
                     // 1-2. 틀렸을경우 event = -1 하고 배열에는 추가하지 않음 화난표정
                     emotion = 2;
+                    score -= 100;
                 }
                 else {
                     // 2. event 확인 후 cook에 저장하기
@@ -313,6 +314,20 @@ public:
                 if (isFollowingMouse) {
                     window.draw(followSprite[event]);
                 }
+
+                // score 표시하기
+                sf::Font font;
+                if (!font.loadFromFile("font/gulim.ttc")) { // 적절한 폰트 경로로 수정
+                    cerr << "Error loading font" << endl;
+                }
+                sf::Text scoreText;
+                scoreText.setFont(font);
+                scoreText.setString(to_string(score));
+                scoreText.setCharacterSize(30); // 글자 크기 설정
+                scoreText.setFillColor(sf::Color::Black); // 글자 색상 설정
+                scoreText.setPosition(1008, 325); // 점수 위치 설정
+
+                window.draw(scoreText); // 점수 텍스트 그리기
             }
 
             void checkButtonClick(sf::Vector2f mousePos) override {
@@ -415,10 +430,10 @@ private:
     sf::Sprite cookSprite[13];
 
     // 음식 작업대 이미지 위치 배열
-    int cookXY[2][11] = { {790, 804, 804, 804, 804, 804, 804, 804, 798, 788},{328, 399, 378, 378, 355, 333, 333, 298, 288} };
+    int cookXY[2][9] = { {790, 804, 804, 804, 804, 804, 804, 798, 788},{328, 399, 378, 378, 355, 333, 333, 298, 288} };
 
     // 음식 레시피 이미지 위치 배열
-    int recipeXY[2][11] = { {761, 777, 777, 777, 777, 777, 777, 771, 761} ,{86, 157, 136, 136, 113, 91, 91, 56, 46} };
+    int recipeXY[2][9] = { {761, 777, 777, 777, 777, 777, 777, 771, 761} ,{86, 157, 136, 136, 113, 91, 91, 56, 46} };
 
     // 레시피 배열
     int recipe[9];

@@ -36,7 +36,7 @@ public:
     }
 
     Button(const string& normalImagePath, const string& hoverImagePath,
-           float x, float y, function<void()> onClick)
+        float x, float y, function<void()> onClick)
         : onClick(onClick) {
         if (!buttonImg.loadFromFile(normalImagePath) ||
             !buttonClickImg.loadFromFile(hoverImagePath)) {
@@ -48,6 +48,16 @@ public:
         hoverSprite.setTexture(buttonClickImg);
         hoverSprite.setPosition(x, y);
     }
+
+    //Button(sf::Texture buttonImg, float x, float y, function<void()> onClick)
+    //    : buttonImg(buttonImg), onClick(onClick) {
+    //    this->buttonImg = buttonImg;
+    //    sprite.setTexture(this->buttonImg);
+    //    sprite.setPosition(x, y);
+    //    hoverSprite.setTexture(this->buttonImg); // 클릭 이미지와 일반 이미지가 같으면 같은 텍스처 사용
+    //    hoverSprite.setPosition(x, y);
+    //}
+
 
     void draw(sf::RenderWindow& window) {
         if (isHovered) {
@@ -143,101 +153,83 @@ private:
 
 class MainScreen : public Screen {
 public:
-    MainScreen() {
-        // 버튼 초기화
-        // 0, 1, 2 -> 아이스크림 3, 4, 5 -> 생크림 6, 7 -> 과일 8 -> 컵 
-        // 9-> 빵 10, 11, 12-> 토핑 13-> 쓰레기통 14-> 작업대
-
-        button_area[0] = Button("img/main/obj_box/ice_box.png", "", 84, 169, [this]() {
-            cout << "Ice Box clicked!" << endl;
-            event = 0;
-            isFollowingMouse = true; // 마우스를 따라다니는 것을 활성화
-            });
-
-        button_area[1] = Button("img/main/obj_box/ice_box.png", "", 85, 260, [this]() {
-            cout << "Another Box clicked!" << endl;
-            event = 1;
-            isFollowingMouse = true;
-            });
-
-        button_area[2] = Button("img/main/obj_box/ice_box.png", "", 85, 358, [this]() {
-            cout << "Another Box clicked!" << endl;
-            event = 2;
-            isFollowingMouse = true;
-            });
-
-        button_area[3] = Button("img/main/obj_box/cream_box.png", "", 202, 160, [this]() {
-            cout << "Another Box clicked!" << endl;
-            event = 3;
-            isFollowingMouse = true;
-            });
-
-        button_area[4] = Button("img/main/obj_box/cream_box.png", "", 202, 255, [this]() {
-            cout << "Another Box clicked!" << endl;
-            event = 4;
-            isFollowingMouse = true;
-            });
-
-        button_area[5] = Button("img/main/obj_box/cream_box.png", "", 202, 358, [this]() {
-            cout << "Another Box clicked!" << endl;
-            event = 5;
-            isFollowingMouse = true;
-            });
-
-        button_area[6] = Button("img/main/obj_box/fruit_box.png", "", 65, 497, [this]() {
-            cout << "Another Box clicked!" << endl;
-            event = 6;
-            isFollowingMouse = true;
-            });
-
-        button_area[7] = Button("img/main/obj_box/fruit_box.png", "", 191, 497, [this]() {
-            cout << "Another Box clicked!" << endl;
-            event = 7;
-            isFollowingMouse = true;
-            });
-
-        button_area[8] = Button("img/main/obj_box/cup_box.png", "", 387, 90, [this]() {
-            cout << "Another Box clicked!" << endl;
-            event = 8;
-            isFollowingMouse = true;
-            });
-
-        button_area[9] = Button("img/main/obj_box/bread_box.png", "", 387, 269, [this]() {
-            cout << "Another Box clicked!" << endl;
-            event = 9;
-            isFollowingMouse = true;
-            });
-
-        button_area[10] = Button("img/main/obj_box/topping_box.png", "", 392, 365, [this]() {
-            cout << "Another Box clicked!" << endl;
-            event = 10;
-            isFollowingMouse = true;
-            });
-
-        button_area[11] = Button("img/main/obj_box/topping_box.png", "", 484, 365, [this]() {
-            cout << "Another Box clicked!" << endl;
-            event = 11;
-            isFollowingMouse = true;
-            });
-
-        button_area[12] = Button("img/main/obj_box/topping_box.png", "", 576, 365, [this]() {
-            cout << "Another Box clicked!" << endl;
-            event = 12;
-            isFollowingMouse = true;
-            });
-
-        button_area[13] = Button("img/main/obj_box/trash_box.png", "", 1014, 502, [this]() {
-            cout << "Another Box clicked!" << endl;
-            isFollowingMouse = false;
-            event = -1;
-            });
-
-        button_area[14] = Button("img/main/obj_box/bench_box.png", "", 703, 269, [this]() {
-            cout << "Another Box clicked!" << endl;
-            isFollowingMouse = false;
-            event = -1;
-            });
-
+    MainScreen()
+        : button_iceBox("img/main/obj_box/ice_box.png", "", 84, 169, [this]() {
+        cout << "Ice Box clicked!" << endl;
+        event = 0;
+        isFollowingMouse = true; // 마우스를 따라다니는 것을 활성화
+            }),
+        button_iceBox2("img/main/obj_box/ice_box.png", "", 85, 260, [this]() {
+        cout << "Another Box clicked!" << endl;
+        event = 1;
+        isFollowingMouse = true;
+            }),
+        button_iceBox3("img/main/obj_box/ice_box.png", "", 85, 358, [this]() {
+        cout << "Another Box clicked!" << endl;
+        event = 2;
+        isFollowingMouse = true;
+            }),
+        button_creamBox1("img/main/obj_box/cream_box.png", "", 202, 160, [this]() {
+        cout << "Another Box clicked!" << endl;
+        event = 3;
+        isFollowingMouse = true;
+            }),
+        button_creamBox2("img/main/obj_box/cream_box.png", "", 202, 255, [this]() {
+        cout << "Another Box clicked!" << endl;
+        event = 4;
+        isFollowingMouse = true;
+            }),
+        button_creamBox3("img/main/obj_box/cream_box.png", "", 202, 358, [this]() {
+        cout << "Another Box clicked!" << endl;
+        event = 5;
+        isFollowingMouse = true;
+            }),
+        button_fruitBox1("img/main/obj_box/fruit_box.png", "", 65, 497, [this]() {
+        cout << "Another Box clicked!" << endl;
+        event = 6;
+        isFollowingMouse = true;
+            }),
+        button_fruitBox2("img/main/obj_box/fruit_box.png", "", 191, 497, [this]() {
+        cout << "Another Box clicked!" << endl;
+        event = 7;
+        isFollowingMouse = true;
+            }),
+        button_cupBox("img/main/obj_box/cup_box.png", "", 387, 90, [this]() {
+        cout << "Another Box clicked!" << endl;
+        event = 8;
+        isFollowingMouse = true;
+            }),
+        button_breadBox("img/main/obj_box/bread_box.png", "", 387, 269, [this]() {
+        cout << "Another Box clicked!" << endl;
+        event = 9;
+        isFollowingMouse = true;
+            }),
+        button_toppingBox1("img/main/obj_box/topping_box.png", "", 392, 365, [this]() {
+        cout << "Another Box clicked!" << endl;
+        event = 10;
+        isFollowingMouse = true;
+            }),
+        button_toppingBox2("img/main/obj_box/topping_box.png", "", 484, 365, [this]() {
+        cout << "Another Box clicked!" << endl;
+        event = 11;
+        isFollowingMouse = true;
+            }),
+        button_toppingBox3("img/main/obj_box/topping_box.png", "", 576, 365, [this]() {
+        cout << "Another Box clicked!" << endl;
+        event = 12;
+        isFollowingMouse = true;
+            }),
+        button_trashBox("img/main/obj_box/trash_box.png", "", 1014, 502, [this]() {
+        cout << "Another Box clicked!" << endl;
+        isFollowingMouse = false;
+        event = -1;
+            }),
+        button_benchBox("img/main/obj_box/bench_box.png", "", 703, 269, [this]() {
+        cout << "Another Box clicked!" << endl;
+        isFollowingMouse = false;
+        event = -1;
+            })
+    {
         // 배경 및 기타 요소 초기화
         backgroundTexture.loadFromFile("img/background/main_back.png");
         backgroundSprite.setTexture(backgroundTexture);
@@ -261,20 +253,31 @@ public:
             followSprite[i].setTexture(followTexture[i]);
             followSprite[i].setPosition(-100, -100);
         }
-
     }
 
     void draw(sf::RenderWindow& window) override {
-
         window.draw(backgroundSprite);
         window.draw(charSprite[emotion]);
         window.draw(messageSprite);
         window.draw(tableSprite);
         window.draw(objSprite);
 
-        for (int i = 0; i < 15; i++) {
-            button_area[i].draw(window);
-        }
+        // 각 버튼을 그리기
+        button_iceBox.draw(window);
+        button_iceBox2.draw(window);
+        button_iceBox3.draw(window);
+        button_creamBox1.draw(window);
+        button_creamBox2.draw(window);
+        button_creamBox3.draw(window);
+        button_fruitBox1.draw(window);
+        button_fruitBox2.draw(window);
+        button_cupBox.draw(window);
+        button_breadBox.draw(window);
+        button_toppingBox1.draw(window);
+        button_toppingBox2.draw(window);
+        button_toppingBox3.draw(window);
+        button_trashBox.draw(window);
+        button_benchBox.draw(window);
 
         // 마우스를 따라다니는 이미지가 활성화 됐을 경우 그리기
         if (isFollowingMouse) {
@@ -283,21 +286,43 @@ public:
     }
 
     void checkButtonClick(sf::Vector2f mousePos) override {
-        for (int i = 0; i < 15; i++) {
-            button_area[i].checkClick(mousePos);
-        }
-
+        button_iceBox.checkClick(mousePos);
+        button_iceBox2.checkClick(mousePos);
+        button_iceBox3.checkClick(mousePos);
+        button_creamBox1.checkClick(mousePos);
+        button_creamBox2.checkClick(mousePos);
+        button_creamBox3.checkClick(mousePos);
+        button_fruitBox1.checkClick(mousePos);
+        button_fruitBox2.checkClick(mousePos);
+        button_cupBox.checkClick(mousePos);
+        button_breadBox.checkClick(mousePos);
+        button_toppingBox1.checkClick(mousePos);
+        button_toppingBox2.checkClick(mousePos);
+        button_toppingBox3.checkClick(mousePos);
+        button_trashBox.checkClick(mousePos);
+        button_benchBox.checkClick(mousePos);
     }
 
     void checkButtonHover(sf::Vector2f mousePos) override {
-        for (int i = 0; i < 15; i++) {
-            button_area[i].checkHover(mousePos);
-        }
+        button_iceBox.checkHover(mousePos);
+        button_iceBox2.checkHover(mousePos);
+        button_iceBox3.checkHover(mousePos);
+        button_creamBox1.checkHover(mousePos);
+        button_creamBox2.checkHover(mousePos);
+        button_creamBox3.checkHover(mousePos);
+        button_fruitBox1.checkHover(mousePos);
+        button_fruitBox2.checkHover(mousePos);
+        button_cupBox.checkHover(mousePos);
+        button_breadBox.checkHover(mousePos);
+        button_toppingBox1.checkHover(mousePos);
+        button_toppingBox2.checkHover(mousePos);
+        button_toppingBox3.checkHover(mousePos);
+        button_trashBox.checkHover(mousePos);
+        button_benchBox.checkHover(mousePos);
     }
 
     void updateFollowSpritePosition(sf::Vector2f mousePos) {
         if (isFollowingMouse) {
-            // 마우스로 이미지 클릭 시, 마우스의 위치-이미지의 크기/2의 위치에 이미지를 띄움
             followSprite[event].setPosition(mousePos.x - followSprite[event].getGlobalBounds().width / 2,
                 mousePos.y - followSprite[event].getGlobalBounds().height / 2);
         }
@@ -324,9 +349,24 @@ private:
     sf::Texture followTexture[13]; // 마우스를 따라다닐 이미지 텍스처
     sf::Sprite followSprite[13];    // 마우스를 따라다닐 이미지 스프라이트
 
-    Button button_area[15];
-
+    // 버튼 변수 선언
+    Button button_iceBox;
+    Button button_iceBox2;
+    Button button_iceBox3;
+    Button button_creamBox1;
+    Button button_creamBox2;
+    Button button_creamBox3;
+    Button button_fruitBox1;
+    Button button_fruitBox2;
+    Button button_cupBox;
+    Button button_breadBox;
+    Button button_toppingBox1;
+    Button button_toppingBox2;
+    Button button_toppingBox3;
+    Button button_trashBox;
+    Button button_benchBox;
 };
+
 
 class LoadingScreen{
 public:

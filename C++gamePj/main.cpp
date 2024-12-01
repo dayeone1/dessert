@@ -1,4 +1,5 @@
 ﻿#include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
 #include <iostream>
 #include <functional>
 #include <string>
@@ -18,6 +19,7 @@ enum screen_number {
 
 int screen_num = screen_number::Loding;
 int score = -1;
+float setTime = 90.0f;
 
 class Button {
 public:
@@ -33,6 +35,7 @@ public:
         sprite.setPosition(x, y);
         hoverSprite.setTexture(buttonClickImg);
         hoverSprite.setPosition(x1, y1);
+
     }
 
     Button(const string& normalImagePath, const string& hoverImagePath,
@@ -47,6 +50,7 @@ public:
         sprite.setPosition(x, y);
         hoverSprite.setTexture(buttonClickImg);
         hoverSprite.setPosition(x, y);
+
     }
 
     void draw(sf::RenderWindow& window) {
@@ -105,6 +109,9 @@ public:
             cerr << "Error loading main background image" << endl;
         }
         backgroundSprite.setTexture(backgroundTexture);
+
+        
+
     }
 
     void draw(sf::RenderWindow& window) override {
@@ -214,7 +221,10 @@ public:
                 isFollowingMouse = false;
 
                 // 1. 조합순서 확인
-                if (event < cook_arr[cook_num][0] || event > cook_arr[cook_num][2]) {
+                if (event == -1) {
+                    emotion = 2;
+                }
+                else if (event < cook_arr[cook_num][0] || event > cook_arr[cook_num][2]) {
                     // 1-2. 틀렸을경우 event = -1 하고 배열에는 추가하지 않음 화난표정
                     emotion = 2;
                     score -= 100;
@@ -350,6 +360,7 @@ public:
             }
 
             void reset() {
+                totalTime = 90;
                 score = 0;
                 emotion = 0;
                 event = -1;
@@ -386,10 +397,24 @@ public:
                     cook[i] = -1;
             }
 
+            void drawTime(sf::RenderWindow& window, int time) {
+                sf::Font font;
+                if (!font.loadFromFile("font/gulim.ttc")) { // 적절한 폰트 경로로 수정
+                    cerr << "Error loading font" << endl;
+                }
+                sf::Text scoreText;
+                scoreText.setFont(font);
+                time = totalTime - time;
+                scoreText.setString(to_string(time));
+                scoreText.setCharacterSize(50); // 글자 크기 설정
+                scoreText.setFillColor(sf::Color::Black); // 글자 색상 설정
+                scoreText.setPosition(777, 551); // 남은시간 위치 설정
+
+                window.draw(scoreText); // 시간 텍스트 그리기
+            }
+
 private:
-    int emotion = 0; // 캐릭터의 표정
-    int event = -1; // 오브제
-    int cook_num = 0; // 조리 진행도
+    int totalTime, emotion, event = -1, cook_num;   // 캐릭터의 표정, 오브제, 조리 진행도
     bool isFollowingMouse = false; // 마우스를 따라다닐지 여부
 
 
@@ -596,14 +621,16 @@ int main() {
                 timerStarted = true;
                 clock.restart(); // 타이머 초기화
             }
-            if (timerStarted && clock.getElapsedTime().asSeconds() >= 3.0f) {
+            if (timerStarted && clock.getElapsedTime().asSeconds() >= 2.0f) {
                 timerStarted = false;
                 screen_num = screen_number::Start;
             }   
             break;
+
         case screen_number::Start:
             start_screen.draw(window);
             break;
+
         case screen_number::Main:
             // 메인스크린 초기화
             if (score == -1) {
@@ -620,9 +647,10 @@ int main() {
 
             // 경과 시간 출력
             //cout << "Elapsed Time: " << clock.getElapsedTime().asSeconds() << " seconds" << endl;
+            main_screen.drawTime(window, clock.getElapsedTime().asSeconds());
 
-            // 60초가 지나면 EndingScreen으로 이동
-            if (timerStarted && clock.getElapsedTime().asSeconds() >= 20.0f) {
+            // 지정한 시간이 지나면 EndingScreen으로 이동
+            if (timerStarted && clock.getElapsedTime().asSeconds() >= setTime) {
                 timerStarted = false;
                 if (score >= 10000)
                     screen_num = screen_number::Happy_Ending;

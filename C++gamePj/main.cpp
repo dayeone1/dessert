@@ -7,7 +7,7 @@
 
 using namespace std;
 
-// 화면 상태를 나타내는 열거형
+// 화면 상태
 enum screen_number {
     Loding,
     Start,
@@ -17,12 +17,15 @@ enum screen_number {
     Rule,
 };
 
-int screen_num = screen_number::Loding;
-int score = -1;
-float setTime = 90.0f;
 
+int screen_num = screen_number::Loding;     // 화면 상태변수
+int score = -1;         // 점수
+float setTime = 90.0f;  // 제한시간
+
+// 버튼 클래스
 class Button {
 public:
+    // 원래 이미지, hover이미지, 각 이미지의 좌표값, 클릭시 발생되는 이벤트
     Button(const string& normalImagePath, const string& hoverImagePath,
            float x, float y, float x1, float y1, function<void()> onClick)
         : onClick(onClick) {
@@ -38,6 +41,7 @@ public:
 
     }
 
+    // hover이미지의 위치가 원래 이미지의 위치와 같은 경우
     Button(const string& normalImagePath, const string& hoverImagePath,
         float x, float y, function<void()> onClick)
         : onClick(onClick) {
@@ -53,6 +57,7 @@ public:
 
     }
 
+    // chekHover을 통해 마우스가 이미지 위에 있으면 hover이미지, 아닐경우 기본 이미지 띄움
     void draw(sf::RenderWindow& window) {
         if (isHovered) {
             window.draw(hoverSprite);
@@ -61,10 +66,13 @@ public:
         }
     }
 
+    // 이미지위에 마우스 있는지 확인
     void checkHover(sf::Vector2f mousePos) {
         isHovered = sprite.getGlobalBounds().contains(mousePos);
+        // (스프라이트의 크기를 구해 그 안에 마우스가 있는지 확인)
     }
 
+    // 이미지 클릭 여부 확인 후 클릭시 이벤트 발생
     void checkClick(sf::Vector2f mousePos) {
         if (sprite.getGlobalBounds().contains(mousePos)) {
             onClick();
@@ -76,29 +84,30 @@ private:
     sf::Texture buttonClickImg;   // 버튼 클릭 이미지
     sf::Sprite sprite;            // 일반 이미지 스프라이트
     sf::Sprite hoverSprite;       // 클릭 이미지 스프라이트
-    function<void()> onClick;
-    bool isHovered = false;        // 현재 호버 상태
+    function<void()> onClick;     // 클릭 이벤트
+    bool isHovered = false;       // 현재 호버 상태
 };
 
+// screen 추상클래스
 class Screen {
 public:
-    virtual void draw(sf::RenderWindow& window) = 0;
-    virtual void checkButtonClick(sf::Vector2f mousePos) = 0;
-    virtual void checkButtonHover(sf::Vector2f mousePos) = 0;
-    virtual ~Screen() {} // 가상 소멸자
+    virtual void draw(sf::RenderWindow& window) = 0;            // 스크린을 화면에 그리는 메소드
+    virtual void checkButtonClick(sf::Vector2f mousePos) = 0;   // main에서 받은 마우스 정보를 Button으로 전달
+    virtual void checkButtonHover(sf::Vector2f mousePos) = 0; 
+    virtual ~Screen() {};
 };
 
+// 엔딩화면 스크린 & 룰 화면 스크린 클래스
 class EndingScreen : public Screen {
 public:
-    EndingScreen(int num)
-        :button_start("img/start/startButton_default.png", "img/start/startButton_start.png", 1086, 450, 960, 380, []() {
+    EndingScreen(int num)       // num을 받아서 관리(룰, 엔딩별 클래스로 관리하기 위해서)
+        :button_start("img/start/startButton_default.png", "img/start/startButton_start.png", 1086, 450, 960, 380, []() {   // 시작버튼
         cout << "Start button clicked!" << endl;
-        // score을 -1로 만들어 main에서 reset 진행되게 함
-        score = -1;
-        screen_num = screen_number::Main; // 화면 변경
+        score = -1;         // score을 -1로 만들어 main에서 reset 진행되게 함
+        screen_num = screen_number::Main;   // 게임 플레이 화면으로 변경
         })
     {
-        if (num == screen_number::Happy_Ending)
+        if (num == screen_number::Happy_Ending)         // num, 화면 상태에 따라 다른 배경 초기화
             img = "img/background/happy_end.png";
         else if (num == screen_number::Bad_Ending)
             img = "img/background/bad_end.png";
@@ -109,13 +118,10 @@ public:
             cerr << "Error loading main background image" << endl;
         }
         backgroundSprite.setTexture(backgroundTexture);
-
-        
-
     }
 
     void draw(sf::RenderWindow& window) override {
-        window.draw(backgroundSprite);
+        window.draw(backgroundSprite);      //배경 그리기
         if (score != -1) {
             sf::Font font;
             if (!font.loadFromFile("font/gulim.ttc")) { // 적절한 폰트 경로로 수정
@@ -265,7 +271,6 @@ public:
 
         // 오브제 이미지
 
-        
         // 배경 및 기타 요소 초기화
         backgroundTexture.loadFromFile("img/background/main_back.png");
         backgroundSprite.setTexture(backgroundTexture);
@@ -480,7 +485,7 @@ private:
     Button button_area[15];
 };
 
-
+// 로딩화면 클래스
 class LoadingScreen{
 public:
     LoadingScreen() {
@@ -506,6 +511,7 @@ private:
     sf::Text loadingText;
 };
 
+// 시작화면 스크린
 class StartScreen : public Screen {
 public:
     StartScreen()

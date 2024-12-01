@@ -227,7 +227,7 @@ public:
                 isFollowingMouse = false;
 
                 // 1. 조합순서 확인
-                if (event == -1) {
+                if (event == -1) {  // 1-1 그냥 빈 화면 클릭일경우 표정만 변화
                     emotion = 2;
                 }
                 else if (event < cook_arr[cook_num][0] || event > cook_arr[cook_num][2]) {
@@ -250,7 +250,7 @@ public:
                             chk = 0; break;
                         }
                     
-                    // 4. 맞는지 틀린지에 따라 표정 변화 후 파르페 배열 초기화, 맞을경우 score += 1000 추가
+                    // 4. 맞는지 틀린지에 따라 표정 변화 후 파르페 배열 & 레시피 초기화, 맞을경우 score += 1000 추가
                     if (chk) {
                         emotion = 1;
                         score += 1000;
@@ -263,7 +263,7 @@ public:
                     }
                     cook_num = 0;
                 }
-
+                // 시스템상 이벤트 삭제
                 event = -1;
             })
         }
@@ -301,7 +301,7 @@ public:
             cookSprite[i].setTexture(cookTexture[i]);
         }
     }
-
+            // 화면에 표시
             void draw(sf::RenderWindow& window) override {
                 window.draw(backgroundSprite);
                 window.draw(charSprite[emotion]);
@@ -314,7 +314,10 @@ public:
                     button_area[i].draw(window);
                 }
 
+                //레시피 & 작업대 영역의 파르페 그리기
                 for (int i = 0; i < 9; i++) {
+                    // 미리 저장해둔 그리는 순서에 맞춰 레시피에 담긴 인덱스의 스프라이트를 꺼냄
+                    // 미리 배열에 저장해둔 좌표로 지정
                     cookSprite[recipe[cook_order[i]]].setPosition(recipeXY[0][cook_order[i]], recipeXY[1][cook_order[i]]);
                     window.draw(cookSprite[recipe[cook_order[i]]]);
 
@@ -345,25 +348,30 @@ public:
                 window.draw(scoreText); // 점수 텍스트 그리기
             }
 
+            // 버튼 클릭체크
             void checkButtonClick(sf::Vector2f mousePos) override {
                 for (int i = 0; i < 15; i++) {
                     button_area[i].checkClick(mousePos);
                 }
             }
 
+            // 버튼 호버체크
             void checkButtonHover(sf::Vector2f mousePos) override {
                 for (int i = 0; i < 15; i++) {
                     button_area[i].checkHover(mousePos);
                 }
             }
 
+            // 마우스를 따라다니는 이미지의 위치 조정
             void updateFollowSpritePosition(sf::Vector2f mousePos) {
                 if (isFollowingMouse) {
+                    // 마우스 좌표값 - 지정된 이미지의 크기 / 2의 위치로 지정
                     followSprite[event].setPosition(mousePos.x - followSprite[event].getGlobalBounds().width / 2,
                         mousePos.y - followSprite[event].getGlobalBounds().height / 2);
                 }
             }
 
+            // 메인화면 리셋
             void reset() {
                 totalTime = 90;
                 score = 0;
@@ -375,6 +383,7 @@ public:
                 resetCook();
             }
 
+            // 레시피 랜덤 생성
             void randomRecipe() {
                 recipe[0] = 8;
 
@@ -511,15 +520,15 @@ private:
     sf::Text loadingText;
 };
 
-// 시작화면 스크린
+// 시작화면 클래스
 class StartScreen : public Screen {
 public:
     StartScreen()
-        :button_start("img/start/startButton_default.png", "img/start/startButton_start.png", 855, 270, 740, 210, []() {
+        :button_start("img/start/startButton_default.png", "img/start/startButton_start.png", 855, 270, 740, 210, []() { // 시작버튼
             cout << "Start button clicked!" << endl;
             screen_num = screen_number::Main; // 상태 변경
         }),
-        button_rule("img/start/startButton_default1.png", "img/start/startButton_rule.png", 705, 270, 590, 210, []() {
+        button_rule("img/start/startButton_default1.png", "img/start/startButton_rule.png", 705, 270, 590, 210, []() { // 설명버튼
             cout << "Rule button clicked!" << endl;
             screen_num = screen_number::Rule;
         }) 
@@ -553,8 +562,9 @@ private:
     Button button_rule;
 };
 
-// 메인
+// 메인 - 만든 클래스들 호출 & 실행
 int main() {
+    // 창 생성
     sf::RenderWindow window(sf::VideoMode(1200, 650), "test");
 
     StartScreen start_screen;
@@ -564,17 +574,17 @@ int main() {
     EndingScreen bad_screen(screen_number::Bad_Ending);
     EndingScreen rule_screen(screen_number::Rule);
 
-    bool loadingComplete = false;
+    bool loadingComplete = false; // 로딩시간 체크용
 
     sf::Clock clock; // 타이머용 시계
     bool timerStarted = false; // 타이머 시작 여부
-
+   
     while (window.isOpen()) {
         sf::Event event;
         while (window.pollEvent(event)) {
             if (event.type == sf::Event::Closed)
                 window.close();
-            if (event.type == sf::Event::MouseButtonPressed) {
+            if (event.type == sf::Event::MouseButtonPressed) { // 각 스크린의 클릭 이벤트 판단
                 switch (screen_num) {
                 case screen_number::Start:
                     start_screen.checkButtonClick(sf::Vector2f(event.mouseButton.x, event.mouseButton.y));
@@ -596,12 +606,13 @@ int main() {
             }
         }
 
+        // mousePos에 현재 마우스의 위치값을 받음
         sf::Vector2f mousePos = (sf::Vector2f)sf::Mouse::getPosition(window);
 
-        // 버튼 호버 체크를 항상 수행
+        // 각 스크린 버튼 호버 체크
         switch (screen_num) {
         case screen_number::Start:
-            start_screen.checkButtonHover(mousePos); // 버튼 호버 체크
+            start_screen.checkButtonHover(mousePos);    //최종적으론 Button에 넘김
             break;
         case screen_number::Main:
             main_screen.checkButtonHover(mousePos);
@@ -620,13 +631,16 @@ int main() {
 
         window.clear();
 
+        // 각 스크린 그리는 역할
         switch (screen_num) {
         case screen_number::Loding:
             loading_screen.draw(window);
+            // 타이머가 정지되어있을 경우 타이머 초기화
             if (!timerStarted) {
                 timerStarted = true;
-                clock.restart(); // 타이머 초기화
+                clock.restart();
             }
+            // 타이머 진행중 & 2초 경과시 시작 스크린으로 넘기기
             if (timerStarted && clock.getElapsedTime().asSeconds() >= 2.0f) {
                 timerStarted = false;
                 screen_num = screen_number::Start;
@@ -651,14 +665,13 @@ int main() {
                 clock.restart(); // 타이머 초기화
             }
 
-            // 경과 시간 출력
-            //cout << "Elapsed Time: " << clock.getElapsedTime().asSeconds() << " seconds" << endl;
+            // 경과 시간을 main_screen.drawTime으로 넘겨 남은시간을 창에 띄움
             main_screen.drawTime(window, clock.getElapsedTime().asSeconds());
 
             // 지정한 시간이 지나면 EndingScreen으로 이동
             if (timerStarted && clock.getElapsedTime().asSeconds() >= setTime) {
                 timerStarted = false;
-                if (score >= 10000)
+                if (score >= 10000)    // score가 10000원 이상일 경우 해피엔딩, 아닐경우 배드엔딩
                     screen_num = screen_number::Happy_Ending;
                 else
                     screen_num = screen_number::Bad_Ending;
